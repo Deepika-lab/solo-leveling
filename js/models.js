@@ -12,6 +12,15 @@ const HUNTER_RANKS = [
   { minLevel: 90, maxLevel: 999, rank: 'NATIONAL', title: 'National Level / Monarch', color: '#ef4444', glow: 'rgba(239, 68, 68, 0.7)' },
 ];
 
+const HUNTER_CLASSES = [
+  { id: 'none', name: 'None (Hunter Initiate)', icon: '⚔️', perk: 'Balanced foundational growth (+1 all stats)' },
+  { id: 'monarch', name: 'Shadow Monarch', icon: '👑', perk: 'Command defeated obstacles (+2 INT, +2 PER)' },
+  { id: 'assassin', name: 'Shadow Assassin', icon: '🗡️', perk: 'Execution speed & rapid habit turnaround (+3 AGI, +1 PER)' },
+  { id: 'striker', name: 'Berserker / Striker', icon: '🥊', perk: 'High-intensity workouts & physical power (+3 STR, +1 VIT)' },
+  { id: 'mage', name: 'Arcane Scholar / Mage', icon: '🔮', perk: 'Deep mental work, coding & learning focus (+4 INT)' },
+  { id: 'tank', name: 'Iron Defender / Tank', icon: '🛡️', perk: 'Sleep discipline, recovery & stamina (+4 VIT)' }
+];
+
 const STAT_DEFINITIONS = {
   str: { name: 'Strength', code: 'STR', desc: 'Muscular power, physical endurance & athletic capacity', color: '#ef4444' },
   agi: { name: 'Agility', code: 'AGI', desc: 'Execution speed, quick chore turnaround & reaction time', color: '#10b981' },
@@ -45,6 +54,7 @@ const DEFAULT_REGIMEN = [
 ];
 
 function getXpRequired(level) {
+  // Smooth mathematical progression curve
   return Math.floor(100 * Math.pow(level, 1.35));
 }
 
@@ -67,7 +77,7 @@ function getDefaultPlayerState() {
   return {
     name: 'Deepika Mamidipelly',
     title: 'The Awakened',
-    job: 'None (Hunter)',
+    job: 'none',
     level: 1,
     currentXp: 0,
     gold: 50,
@@ -87,9 +97,7 @@ function getDefaultPlayerState() {
     penaltyEngaged: false,
     penaltyDeadline: null,
     unlockedTitles: ['awakened'],
-    // Fully configurable Daily Regimen items
     dailyRegimen: JSON.parse(JSON.stringify(DEFAULT_REGIMEN)),
-    // Custom Daily Quests
     customQuests: [
       {
         id: 'quest_read',
@@ -122,7 +130,6 @@ function getDefaultPlayerState() {
         category: 'Discipline'
       }
     ],
-    // Active Dungeon Gates
     dungeons: [
       {
         id: 'dungeon_intro',
@@ -143,7 +150,6 @@ function getDefaultPlayerState() {
         ]
       }
     ],
-    // Shadow Army
     shadows: [
       {
         id: 'shadow_igris_init',
@@ -161,6 +167,7 @@ function getDefaultPlayerState() {
 
 window.HunterModels = {
   HUNTER_RANKS,
+  HUNTER_CLASSES,
   STAT_DEFINITIONS,
   DEFAULT_TITLES,
   DEFAULT_PRESET_REWARDS,

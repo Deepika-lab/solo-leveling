@@ -1,5 +1,5 @@
 /**
- * app.js - Main Application Controller, 3D Engine Hooks, and Task Configuration
+ * app.js - Main Application Controller, 3D Engine Hooks, Leveling System & PWA
  */
 
 class SoloLevelingApp {
@@ -16,11 +16,28 @@ class SoloLevelingApp {
     // 3D Visual Engine
     this.scene3D = new window.Scene3DManager();
 
+    // PWA Install prompt listener
+    this.deferredPrompt = null;
+    this.initPWA();
+
     this.initEventListeners();
     this.initCardParallax();
     this.render();
 
     this.checkInitialStatus();
+  }
+
+  initPWA() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      const btn = document.getElementById('btn-install-app');
+      if (btn) btn.classList.remove('hidden');
+    });
   }
 
   checkInitialStatus() {
@@ -38,15 +55,23 @@ class SoloLevelingApp {
 
   persistAndRender() {
     window.StorageManager.saveState(this.state);
+    this.flashAutoSaveIndicator();
     this.render();
   }
 
-  // 3D Parallax & Combat FX
+  flashAutoSaveIndicator() {
+    const el = document.getElementById('autosave-indicator');
+    if (!el) return;
+    el.classList.add('saving');
+    clearTimeout(this._saveTimeout);
+    this._saveTimeout = setTimeout(() => el.classList.remove('saving'), 1200);
+  }
+
   triggerScreenShake() {
     document.body.classList.remove('screen-shake');
     void document.body.offsetWidth;
     document.body.classList.add('screen-shake');
-    setTimeout(() => document.body.classList.remove('screen-shake'), 400);
+    setTimeout(() => document.body.classList.remove('screen-shake'), 450);
   }
 
   showFloatingCombatText(x, y, text, type = 'xp') {
@@ -79,15 +104,20 @@ class SoloLevelingApp {
     });
   }
 
-  // XP & Progression
-  addXp(amount) {
+  // XP & Progression Engine
+  addXp(amount, event = null) {
     this.state.currentXp += amount;
+    if (event) {
+      const rect = event.target.getBoundingClientRect();
+      this.showFloatingCombatText(rect.left + 20, rect.top - 15, `+${amount} EXP!`, 'xp');
+    }
     this.checkLevelUp();
     this.persistAndRender();
   }
 
   checkLevelUp() {
     let leveledUp = false;
+    let oldLevel = this.state.level;
     let levelsGained = 0;
 
     let reqXp = window.HunterModels.getXpRequired(this.state.level);
@@ -109,11 +139,27 @@ class SoloLevelingApp {
 
       window.systemAudio.playLevelUp();
       this.triggerScreenShake();
-      this.showModalNotification(
-        "★ LEVEL UP! ★",
-        `CONGRATULATIONS, PLAYER!\n\nYou have ascended to LEVEL ${this.state.level}!\n[Rank: ${currentRank.title}]\n\nREWARDS:\n• +${levelsGained * 3} Unallocated Stat Points\n• HP & MP completely replenished\n• System authority expanded.`
-      );
+
+      // Trigger Fullscreen Cinematic Level-Up celebration
+      this.openLevelUpCelebration(oldLevel, this.state.level, levelsGained * 3, currentRank);
     }
+  }
+
+  openLevelUpCelebration(oldLevel, newLevel, pointsGained, rank) {
+    const modal = document.getElementById('levelup-celebration-modal');
+    if (!modal) return;
+
+    document.getElementById('celebration-level-text').innerText = `LEVEL ${oldLevel} ➔ LEVEL ${newLevel}`;
+    document.getElementById('celebration-rank-badge').innerText = `${rank.rank}-RANK [${rank.title}]`;
+    document.getElementById('celebration-points-text').innerText = `+${pointsGained} UNALLOCATED STAT POINTS`;
+
+    modal.classList.remove('hidden');
+
+    const btn = document.getElementById('btn-claim-levelup');
+    btn.onclick = () => {
+      window.systemAudio.playGateClear();
+      modal.classList.add('hidden');
+    };
   }
 
   healToFull() {
@@ -141,6 +187,14 @@ class SoloLevelingApp {
     }
 
     window.systemAudio.playStatAllocate();
+    this.persistAndRender();
+  }
+
+  setHunterClass(classId) {
+    this.state.job = classId;
+    const classObj = window.HunterModels.HUNTER_CLASSES.find(c => c.id === classId);
+    window.systemAudio.playGateClear();
+    this.showNotification(`[CLASS AWAKENED] ${classObj.name}!`);
     this.persistAndRender();
   }
 
@@ -230,9 +284,15 @@ class SoloLevelingApp {
     const maxMp = window.HunterModels.calculateMaxMp(this.state.stats.int);
     const mpPercent = Math.min(100, Math.max(0, Math.floor(((this.state.currentMp || maxMp) / maxMp) * 100)));
 
-    document.getElementById('hdr-player-name').innerText = this.state.name || 'Player';
+    document.getElementById('hdr-player-name').innerText = this.state.name || 'Deepika Mamidipelly';
     document.getElementById('hdr-player-title').innerText = this.state.title || 'The Awakened';
     document.getElementById('hdr-player-level').innerText = `Lv. ${this.state.level}`;
+
+    const currentClass = window.HunterModels.HUNTER_CLASSES.find(c => c.id === (this.state.job || 'none'));
+    const classBadge = document.getElementById('hdr-player-class');
+    if (classBadge && currentClass) {
+      classBadge.innerText = `${currentClass.icon} ${currentClass.name}`;
+    }
 
     const rankBadge = document.getElementById('hdr-player-rank');
     rankBadge.innerText = `${rankInfo.rank}-RANK`;
@@ -350,7 +410,32 @@ class SoloLevelingApp {
     });
 
     this.drawStatRadarChart();
+    this.renderClassesList();
     this.renderTitlesList();
+  }
+
+  renderClassesList() {
+    const container = document.getElementById('classes-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    window.HunterModels.HUNTER_CLASSES.forEach(cls => {
+      const isSelected = (this.state.job || 'none') === cls.id;
+      const card = document.createElement('div');
+      card.className = `class-card card-3d-tilt ${isSelected ? 'selected' : ''}`;
+      card.innerHTML = `
+        <div class="class-header">
+          <span class="class-icon">${cls.icon}</span>
+          <span class="class-title">${cls.name}</span>
+          ${isSelected ? '<span class="badge-equipped">ACTIVE CLASS</span>' : ''}
+        </div>
+        <div class="class-perk">${cls.perk}</div>
+        ${!isSelected ? `
+          <button class="btn-select-class" data-class="${cls.id}">Awaken Class</button>
+        ` : ''}
+      `;
+      container.appendChild(card);
+    });
   }
 
   drawStatRadarChart() {
@@ -543,7 +628,6 @@ class SoloLevelingApp {
       return;
     }
 
-    // Set 3D Gate color to top active dungeon's rank
     const activeGate = this.state.dungeons.find(d => !d.completed) || this.state.dungeons[0];
     if (activeGate && this.scene3D) {
       this.scene3D.setGateRankColor(activeGate.rank);
@@ -703,7 +787,7 @@ class SoloLevelingApp {
 
   // SETTINGS TAB
   renderSettingsTab() {
-    document.getElementById('profile-name-input').value = this.state.name || 'Player';
+    document.getElementById('profile-name-input').value = this.state.name || 'Deepika Mamidipelly';
     const soundToggle = document.getElementById('sound-toggle-btn');
     soundToggle.innerText = window.systemAudio.enabled ? 'Sound: ENABLED' : 'Sound: MUTED';
     soundToggle.className = window.systemAudio.enabled ? 'btn-action btn-cyan' : 'btn-action btn-muted';
@@ -730,6 +814,31 @@ class SoloLevelingApp {
       });
     }
 
+    // PWA Install button in header
+    const btnInstall = document.getElementById('btn-install-app');
+    if (btnInstall) {
+      btnInstall.addEventListener('click', async () => {
+        if (this.deferredPrompt) {
+          this.deferredPrompt.prompt();
+          const { outcome } = await this.deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            btnInstall.classList.add('hidden');
+          }
+          this.deferredPrompt = null;
+        } else {
+          alert("To install on Mac: In Safari, click File > 'Add to Dock'. In Chrome, click the install icon in the address bar!");
+        }
+      });
+    }
+
+    // Test Level Up / Demo XP Boost in Settings
+    const btnTestXp = document.getElementById('btn-test-xp');
+    if (btnTestXp) {
+      btnTestXp.addEventListener('click', (e) => {
+        this.addXp(100, e);
+      });
+    }
+
     // Allocate Stat clicks
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('btn-allocate')) {
@@ -739,6 +848,10 @@ class SoloLevelingApp {
       if (e.target.classList.contains('btn-equip-title')) {
         const title = e.target.getAttribute('data-title');
         this.setActiveTitle(title);
+      }
+      if (e.target.classList.contains('btn-select-class')) {
+        const clsId = e.target.getAttribute('data-class');
+        this.setHunterClass(clsId);
       }
     });
 
@@ -1052,7 +1165,7 @@ class SoloLevelingApp {
     }
   }
 
-  // MODAL HANDLERS FOR TASK CONFIGURATION
+  // MODAL HANDLERS
   openEditRegimenModal(regimenId) {
     const modal = document.getElementById('edit-regimen-modal');
     const titleEl = document.getElementById('regimen-modal-title');
@@ -1156,7 +1269,6 @@ class SoloLevelingApp {
 
     modal.classList.remove('hidden');
 
-    // Add milestone in modal
     const btnAddTask = document.getElementById('btn-add-milestone-task');
     const inputNewTask = document.getElementById('input-new-milestone-task');
     btnAddTask.onclick = () => {
@@ -1167,7 +1279,6 @@ class SoloLevelingApp {
       }
     };
 
-    // Save edited task titles and deletions
     tasksListContainer.onclick = (e) => {
       if (e.target.classList.contains('btn-delete-gate-task')) {
         const taskId = e.target.getAttribute('data-id');

@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE SYSTEM | Solo Leveling Life RPG</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00f0ff">
   <link rel="stylesheet" href="css/system-theme.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
@@ -27,11 +29,20 @@
               <span class="player-level-badge" id="hdr-player-level">Lv. 1</span>
               <span class="player-rank-badge" id="hdr-player-rank">E-RANK</span>
             </div>
-            <span class="player-title" id="hdr-player-title">The Awakened</span>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+              <span class="player-title" id="hdr-player-title">The Awakened</span>
+              <span class="quest-tag" id="hdr-player-class" style="border-color: var(--cyan); color: var(--cyan);">⚔️ Hunter Initiate</span>
+            </div>
           </div>
         </div>
 
         <div class="header-currencies">
+          <!-- Auto-save pulse -->
+          <div class="autosave-indicator" id="autosave-indicator" title="All progress is saved in local storage">
+            <span class="autosave-dot"></span>
+            <span>AUTO-SAVED</span>
+          </div>
+
           <div class="currency-pill gold" title="Hunter Gold">
             <span>🪙</span>
             <span id="hdr-gold-val">0</span>
@@ -44,6 +55,7 @@
             <span>🔥</span>
             <span id="hdr-streak-val">0d</span>
           </div>
+          <button class="btn-install-app hidden" id="btn-install-app">📲 INSTALL APP</button>
           <button class="btn-header" id="btn-sound-toggle">🔊 SOUND ON</button>
         </div>
       </div>
@@ -133,6 +145,15 @@
             <!-- Stat Allocations -->
             <div class="stats-list" id="stats-list"></div>
           </div>
+        </div>
+
+        <!-- Hunter Class Specializations -->
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">🛡️ HUNTER CLASS SPECIALIZATIONS</h2>
+            <span class="player-title">AWAKEN YOUR COMBAT PATH</span>
+          </div>
+          <div class="classes-list" id="classes-list"></div>
         </div>
 
         <!-- Hunter Titles & Milestones -->
@@ -231,6 +252,13 @@
               </div>
             </div>
 
+            <!-- Instant Level Up & XP Boost Demo -->
+            <div class="form-group">
+              <label class="form-label">Game Level Progression Demo</label>
+              <button class="btn-action btn-cyan" id="btn-test-xp">⚡ Gain +100 EXP (Test Level Up Experience)</button>
+              <span style="font-size: 11px; color: var(--text-muted);">Instantly adds 100 EXP so you can experience the level up fanfare, animation, and stat point gains!</span>
+            </div>
+
             <div class="form-group">
               <label class="form-label">Sound Effects</label>
               <button class="btn-action btn-cyan" id="sound-toggle-btn">Sound: ENABLED</button>
@@ -262,6 +290,22 @@
 
   <!-- TOAST NOTIFICATION -->
   <div class="system-toast" id="system-toast">Notification</div>
+
+  <!-- CINEMATIC LEVEL-UP CELEBRATION MODAL -->
+  <div class="celebration-overlay hidden" id="levelup-celebration-modal">
+    <div class="celebration-content">
+      <div class="celebration-title-banner">★ SYSTEM NOTIFICATION ★</div>
+      <div class="celebration-main-title">YOU HAVE LEVELED UP!</div>
+      <div class="celebration-level-change" id="celebration-level-text">LEVEL 1 ➔ LEVEL 2</div>
+      <div class="celebration-rank-badge" id="celebration-rank-badge">E-RANK [E-Rank Hunter]</div>
+      <div class="celebration-rewards-box">
+        <div class="celebration-reward-line points" id="celebration-points-text">+3 UNALLOCATED STAT POINTS</div>
+        <div class="celebration-reward-line">✦ FULL HP & MP COMPLETELY RESTORED</div>
+        <div class="celebration-reward-line">✦ SYSTEM AUTHORITY EXPANDED</div>
+      </div>
+      <button class="btn-celebration-claim" id="btn-claim-levelup">⚡ EMBRACE ASCENSION</button>
+    </div>
+  </div>
 
   <!-- ICONIC SYSTEM MODAL -->
   <div class="modal-overlay hidden" id="system-modal">

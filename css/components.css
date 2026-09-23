@@ -1,6 +1,233 @@
 /* ==========================================================================
-   COMPONENTS CSS - 3D HUD, RADAR, CONFIGURABLE REGIMEN, COMBAT FX
+   COMPONENTS CSS - 3D HUD, RADAR, CONFIGURABLE REGIMEN, COMBAT FX & CINEMATICS
    ========================================================================== */
+
+/* ==========================================================================
+   AUTO-SAVE & PWA INDICATOR
+   ========================================================================== */
+.autosave-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.autosave-indicator.saving {
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green);
+}
+
+.autosave-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.autosave-indicator.saving .autosave-dot {
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+.btn-install-app {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(168, 85, 247, 0.3));
+  border: 1px solid var(--cyan);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.btn-install-app:hover {
+  background: var(--cyan);
+  color: #000;
+  box-shadow: 0 0 16px var(--cyan);
+}
+
+/* ==========================================================================
+   CINEMATIC FULLSCREEN LEVEL-UP CELEBRATION
+   ========================================================================== */
+.celebration-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(3, 7, 18, 0.94);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.celebration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  max-width: 600px;
+  padding: 40px;
+  background: radial-gradient(circle at center, rgba(14, 165, 233, 0.15) 0%, rgba(10, 18, 33, 0.9) 70%);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 60px rgba(0, 240, 255, 0.6);
+  border-radius: 12px;
+  animation: levelUpPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes levelUpPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.celebration-title-banner {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--cyan);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.celebration-main-title {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #fff 0%, var(--cyan) 50%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+}
+
+.celebration-level-change {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.celebration-rank-badge {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.celebration-rewards-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 16px 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.celebration-reward-line {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.celebration-reward-line.points {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.btn-celebration-claim {
+  background: linear-gradient(135deg, var(--cyan), #0284c7);
+  color: #000;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  box-shadow: 0 0 25px var(--cyan);
+  transition: all 0.2s;
+}
+
+.btn-celebration-claim:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 35px var(--cyan);
+}
+
+/* ==========================================================================
+   HUNTER CLASS SPECIALIZATIONS
+   ========================================================================== */
+.classes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.class-card {
+  background: rgba(5, 8, 17, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.class-card.selected {
+  border-color: var(--cyan);
+  background: rgba(0, 240, 255, 0.08);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+}
+
+.class-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.class-icon { font-size: 20px; }
+.class-title { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+
+.class-perk {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.btn-select-class {
+  align-self: flex-start;
+  margin-top: 6px;
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-select-class:hover {
+  background: var(--cyan);
+  color: #000;
+}
 
 /* ==========================================================================
    3D VIEWPORTS (STATUS & DUNGEONS)
@@ -372,19 +599,9 @@
   gap: 8px;
 }
 
-.regimen-icon {
-  font-size: 20px;
-}
-
-.regimen-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.regimen-title.cleared {
-  color: var(--green);
-}
+.regimen-icon { font-size: 20px; }
+.regimen-title { font-size: 14px; font-weight: 700; color: #fff; }
+.regimen-title.cleared { color: var(--green); }
 
 .regimen-tools {
   display: flex;
@@ -672,21 +889,10 @@
   font-size: 14px;
   cursor: pointer;
 }
-.btn-delete-dungeon:hover {
-  color: var(--crimson);
-}
+.btn-delete-dungeon:hover { color: var(--crimson); }
 
-.dungeon-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.dungeon-desc {
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.4;
-}
+.dungeon-title { font-size: 16px; font-weight: 700; color: #fff; }
+.dungeon-desc { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
 
 .boss-hud {
   background: rgba(0, 0, 0, 0.5);
@@ -706,14 +912,8 @@
   font-size: 12px;
 }
 
-.boss-name {
-  color: var(--crimson);
-  font-weight: 700;
-}
-
-.boss-hp-text {
-  color: var(--text-dim);
-}
+.boss-name { color: var(--crimson); font-weight: 700; }
+.boss-hp-text { color: var(--text-dim); }
 
 .boss-hp-bar {
   height: 10px;
@@ -758,17 +958,8 @@
   color: var(--text-muted);
 }
 
-.task-text {
-  flex: 1;
-  font-size: 13px;
-  color: #fff;
-}
-
-.task-dmg {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--crimson);
-}
+.task-text { flex: 1; font-size: 13px; color: #fff; }
+.task-dmg { font-family: var(--font-mono); font-size: 11px; color: var(--crimson); }
 
 .dungeon-footer {
   display: flex;
@@ -873,12 +1064,7 @@
   text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
 }
 
-.shadow-source {
-  font-size: 11px;
-  color: #c084fc;
-  font-family: var(--font-mono);
-}
-
+.shadow-source { font-size: 11px; color: #c084fc; font-family: var(--font-mono); }
 .shadow-quote {
   font-size: 12px;
   font-style: italic;
@@ -898,12 +1084,7 @@
   margin-top: 4px;
 }
 
-.shadow-date {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
+.shadow-date { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
 .btn-dismiss-shadow {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -914,10 +1095,7 @@
   border-radius: 3px;
   cursor: pointer;
 }
-.btn-dismiss-shadow:hover {
-  color: var(--crimson);
-  border-color: var(--crimson);
-}
+.btn-dismiss-shadow:hover { color: var(--crimson); border-color: var(--crimson); }
 
 /* ==========================================================================
    SHOP & INVENTORY TAB
@@ -948,24 +1126,9 @@
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
 }
 
-.shop-icon {
-  font-size: 32px;
-  margin-bottom: 4px;
-}
-
-.shop-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.shop-category {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
+.shop-icon { font-size: 32px; margin-bottom: 4px; }
+.shop-name { font-size: 14px; font-weight: 700; color: #fff; }
+.shop-category { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; }
 .shop-cost {
   font-family: var(--font-mono);
   font-size: 14px;
@@ -1011,11 +1174,8 @@
   font-size: 12px;
   cursor: pointer;
 }
-.btn-delete-shop:hover {
-  color: var(--crimson);
-}
+.btn-delete-shop:hover { color: var(--crimson); }
 
-/* Inventory List */
 .inventory-list {
   display: flex;
   flex-direction: column;
@@ -1032,46 +1192,16 @@
   padding: 10px 16px;
 }
 
-.inventory-item.used {
-  opacity: 0.5;
-}
+.inventory-item.used { opacity: 0.5; }
 
-.inv-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.inv-left { display: flex; align-items: center; gap: 12px; }
+.inv-icon { font-size: 22px; }
+.inv-meta { display: flex; flex-direction: column; }
+.inv-name { font-size: 13px; font-weight: 600; color: #fff; }
+.inv-name.crossed { text-decoration: line-through; }
+.inv-date { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
 
-.inv-icon {
-  font-size: 22px;
-}
-
-.inv-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.inv-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.inv-name.crossed {
-  text-decoration: line-through;
-}
-
-.inv-date {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-.inv-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.inv-actions { display: flex; align-items: center; gap: 10px; }
 
 .btn-redeem {
   background: var(--cyan);
@@ -1086,17 +1216,8 @@
   transition: all 0.2s;
 }
 
-.btn-redeem:hover {
-  box-shadow: 0 0 10px var(--cyan);
-}
-
-.badge-redeemed {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--green);
-  font-weight: 700;
-}
-
+.btn-redeem:hover { box-shadow: 0 0 10px var(--cyan); }
+.badge-redeemed { font-family: var(--font-mono); font-size: 11px; color: var(--green); font-weight: 700; }
 .btn-remove-inv {
   background: transparent;
   border: none;
@@ -1104,6 +1225,4 @@
   font-size: 14px;
   cursor: pointer;
 }
-.btn-remove-inv:hover {
-  color: var(--crimson);
-}
+.btn-remove-inv:hover { color: var(--crimson); }
