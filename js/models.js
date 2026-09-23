@@ -65,7 +65,7 @@ function getDefaultPlayerState() {
   const today = new Date().toISOString().split('T')[0];
 
   return {
-    name: 'Player',
+    name: 'Deepika Mamidipelly',
     title: 'The Awakened',
     job: 'None (Hunter)',
     level: 1,
