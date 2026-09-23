@@ -55,6 +55,10 @@
             <span>🔥</span>
             <span id="hdr-streak-val">0d</span>
           </div>
+          <div class="currency-pill countdown" title="Daily Quest Reset Countdown (Time until Penalty Zone)">
+            <span>⏳</span>
+            <span id="daily-countdown-timer">24:00:00</span>
+          </div>
           <button class="btn-install-app hidden" id="btn-install-app">📲 INSTALL APP</button>
           <button class="btn-header" id="btn-sound-toggle">🔊 SOUND ON</button>
         </div>
@@ -170,7 +174,12 @@
         <!-- Configurable Daily Physical Regimen -->
         <div class="panel-card card-3d-tilt">
           <div class="panel-header-row">
-            <h2 class="panel-title">⚔️ [DAILY QUEST: GETTING READY TO BECOME STRONG]</h2>
+            <div>
+              <h2 class="panel-title">⚔️ [DAILY QUEST: GETTING READY TO BECOME STRONG]</h2>
+              <div class="quest-countdown-subtext">
+                RESET TIMER: <span id="quest-tab-countdown" class="countdown-highlight">--:--:--</span> | Complete all tasks before midnight to prevent Penalty Zone transport!
+              </div>
+            </div>
             <div style="display: flex; gap: 8px;">
               <button class="btn-action" id="btn-add-regimen">+ Add Exercise</button>
               <button class="btn-action btn-muted" id="btn-reset-regimen" title="Restore default pushups, situps, squats, running">↺ Defaults</button>

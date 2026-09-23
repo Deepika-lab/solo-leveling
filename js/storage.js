@@ -1,5 +1,5 @@
 /**
- * storage.js - LocalStorage Persistence, Day Rollover & Data Backup (Export/Import)
+ * storage.js - LocalStorage Persistence, Permanent Storage Locking & Day Rollover
  */
 
 const STORAGE_KEY = 'solo_leveling_system_save_v1';
@@ -10,7 +10,17 @@ class StorageManager {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
+  // Request browser permanent storage so data is NEVER cleared by OS cache cleaners
+  static requestPersistentStorage() {
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then((isPersisted) => {
+        console.log(`[Storage] Persistent storage granted: ${isPersisted}`);
+      }).catch(console.warn);
+    }
+  }
+
   static loadState() {
+    this.requestPersistentStorage();
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
@@ -29,7 +39,6 @@ class StorageManager {
     }
   }
 
-  // Schema migration for configurable daily regimen
   static migrateState(state) {
     if (!state.dailyRegimen || !Array.isArray(state.dailyRegimen)) {
       const old = state.dailyRegimen || {};
@@ -39,6 +48,14 @@ class StorageManager {
         { id: 'reg_squats', label: 'Squats', current: old.squats ? old.squats.current : 0, target: old.squats ? old.squats.target : 100, unit: 'reps', icon: '🦵', stat: 'str' },
         { id: 'reg_running', label: 'Running', current: old.running ? old.running.current : 0, target: old.running ? old.running.target : 10, unit: 'km', icon: '🏃', stat: 'agi' }
       ];
+    }
+    if (!state.penaltyTrial) {
+      state.penaltyTrial = {
+        active: false,
+        task: 'Emergency Survival: 30 minutes of high-intensity physical training or deep uninterrupted focus',
+        requiredMinutes: 30,
+        elapsedMinutes: 0
+      };
     }
     return state;
   }
@@ -69,10 +86,19 @@ class StorageManager {
         state.penaltyEngaged = false;
         state.currentXp += 50;
       } else {
+        // Daily quest failure -> HARD PUNISHMENT
         state.penaltyEngaged = true;
         state.streak = 0;
+        // Slash HP to 10%
         const maxHp = window.HunterModels.calculateMaxHp(state.stats.vit);
-        state.currentHp = Math.max(10, Math.floor((state.currentHp || maxHp) - (maxHp * 0.2)));
+        state.currentHp = Math.max(5, Math.floor(maxHp * 0.1));
+        // Deduct 50 EXP as penalty
+        state.currentXp = Math.max(0, state.currentXp - 50);
+
+        if (state.penaltyTrial) {
+          state.penaltyTrial.active = true;
+          state.penaltyTrial.elapsedMinutes = 0;
+        }
       }
 
       // Reset daily regimen

@@ -1,5 +1,5 @@
 /**
- * app.js - Main Application Controller, 3D Engine Hooks, Leveling System & PWA
+ * app.js - Main Application Controller, 3D Engine Hooks, Leveling System, Penalty System & PWA
  */
 
 class SoloLevelingApp {
@@ -139,8 +139,6 @@ class SoloLevelingApp {
 
       window.systemAudio.playLevelUp();
       this.triggerScreenShake();
-
-      // Trigger Fullscreen Cinematic Level-Up celebration
       this.openLevelUpCelebration(oldLevel, this.state.level, levelsGained * 3, currentRank);
     }
   }
@@ -316,21 +314,35 @@ class SoloLevelingApp {
     document.getElementById('xp-bar-fill').style.width = `${xpPercent}%`;
     document.getElementById('xp-text').innerText = `${this.state.currentXp} / ${reqXp} XP (${xpPercent}%)`;
 
-    // Penalty Banner Alert
+    // Penalty Zone Visual Warnings
     const penaltyBanner = document.getElementById('penalty-zone-banner');
-    if (penaltyBanner) {
-      if (this.state.penaltyEngaged) {
-        penaltyBanner.classList.remove('hidden');
-      } else {
-        penaltyBanner.classList.add('hidden');
-      }
+    const headerHud = document.querySelector('.system-header');
+
+    if (this.state.penaltyEngaged) {
+      if (penaltyBanner) penaltyBanner.classList.remove('hidden');
+      if (headerHud) headerHud.classList.add('penalty-border-alert');
+    } else {
+      if (penaltyBanner) penaltyBanner.classList.add('hidden');
+      if (headerHud) headerHud.classList.remove('penalty-border-alert');
     }
   }
 
   renderTabs() {
+    const lockedTabs = ['dungeons', 'shop'];
+
     const tabs = document.querySelectorAll('.nav-tab');
     tabs.forEach(tab => {
       const tabName = tab.getAttribute('data-tab');
+
+      // Enforce tab lockout during Penalty Zone
+      if (this.state.penaltyEngaged && lockedTabs.includes(tabName)) {
+        tab.classList.add('tab-locked');
+        tab.setAttribute('title', '🚫 LOCKED: Complete Penalty Zone to unlock');
+      } else {
+        tab.classList.remove('tab-locked');
+        tab.removeAttribute('title');
+      }
+
       if (tabName === this.activeTab) {
         tab.classList.add('active');
       } else {
@@ -795,11 +807,19 @@ class SoloLevelingApp {
 
   // EVENT LISTENERS & MODALS
   initEventListeners() {
-    // Nav Tabs
+    // Nav Tabs with Penalty Zone Lockout
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
+        const tabName = tab.getAttribute('data-tab');
+        if (this.state.penaltyEngaged && (tabName === 'dungeons' || tabName === 'shop')) {
+          window.systemAudio.playWarning();
+          this.triggerScreenShake();
+          this.showNotification("🚫 [ACCESS DENIED] Dungeons and Shop are LOCKED while in the Penalty Zone!");
+          return;
+        }
+
         window.systemAudio.playClick();
-        this.activeTab = tab.getAttribute('data-tab');
+        this.activeTab = tabName;
         this.render();
       });
     });

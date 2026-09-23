@@ -1226,3 +1226,53 @@
   cursor: pointer;
 }
 .btn-remove-inv:hover { color: var(--crimson); }
+
+/* ==========================================================================
+   PENALTY ZONE SYSTEM LOCKOUT & COUNTDOWN STYLES
+   ========================================================================== */
+.system-header.penalty-border-alert {
+  border-bottom: 2px solid var(--crimson) !important;
+  box-shadow: 0 4px 30px rgba(239, 68, 68, 0.4);
+  animation: pulse-danger-border 2s infinite ease-in-out;
+}
+
+@keyframes pulse-danger-border {
+  0%, 100% { border-bottom-color: rgba(239, 68, 68, 0.5); }
+  50% { border-bottom-color: rgba(239, 68, 68, 1); box-shadow: 0 4px 40px rgba(239, 68, 68, 0.7); }
+}
+
+.nav-tab.tab-locked {
+  opacity: 0.4;
+  filter: grayscale(80%);
+  cursor: not-allowed !important;
+  position: relative;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+.nav-tab.tab-locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 11px;
+}
+
+.nav-tab.tab-locked:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+.quest-countdown-subtext {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+.countdown-highlight {
+  color: var(--cyan);
+  font-weight: 700;
+  text-shadow: 0 0 8px var(--cyan);
+}

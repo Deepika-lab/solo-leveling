@@ -266,6 +266,15 @@ body::after {
   color: var(--green);
 }
 
+.currency-pill.countdown {
+  border-color: rgba(0, 240, 255, 0.4);
+  color: var(--cyan);
+}
+
+.currency-pill.countdown span:last-child {
+  letter-spacing: 0.5px;
+}
+
 .btn-header {
   background: rgba(0, 240, 255, 0.1);
   border: 1px solid var(--border-neon);
