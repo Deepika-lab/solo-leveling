@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE SYSTEM | Solo Leveling Life RPG</title>
+  <link rel="stylesheet" href="css/system-theme.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+  <!-- Three.js 3D Library with local fallback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- 3D COSMIC BACKGROUND CANVAS -->
+  <canvas id="bg-3d-canvas"></canvas>
+
+  <div class="system-container">
+    <!-- SYSTEM HEADER HUD -->
+    <header class="system-header card-3d-tilt">
+      <div class="header-top-row">
+        <div class="player-identity">
+          <div class="player-avatar-emblem">⚔️</div>
+          <div class="player-info-text">
+            <div class="player-name-wrap">
+              <span class="player-name" id="hdr-player-name">Player</span>
+              <span class="player-level-badge" id="hdr-player-level">Lv. 1</span>
+              <span class="player-rank-badge" id="hdr-player-rank">E-RANK</span>
+            </div>
+            <span class="player-title" id="hdr-player-title">The Awakened</span>
+          </div>
+        </div>
+
+        <div class="header-currencies">
+          <div class="currency-pill gold" title="Hunter Gold">
+            <span>🪙</span>
+            <span id="hdr-gold-val">0</span>
+          </div>
+          <div class="currency-pill crystals" title="Mana Crystals">
+            <span>💎</span>
+            <span id="hdr-crystals-val">0</span>
+          </div>
+          <div class="currency-pill streak" title="Daily Cleared Streak">
+            <span>🔥</span>
+            <span id="hdr-streak-val">0d</span>
+          </div>
+          <button class="btn-header" id="btn-sound-toggle">🔊 SOUND ON</button>
+        </div>
+      </div>
+
+      <!-- Vital Bars (HP, MP, EXP) -->
+      <div class="header-bars-row">
+        <div class="meter-box">
+          <div class="meter-labels">
+            <span class="meter-name hp">HP (HEALTH)</span>
+            <span class="meter-val" id="hp-text">300 / 300</span>
+          </div>
+          <div class="meter-track">
+            <div class="meter-fill hp" id="hp-bar-fill" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="meter-box">
+          <div class="meter-labels">
+            <span class="meter-name mp">MP (MANA)</span>
+            <span class="meter-val" id="mp-text">200 / 200</span>
+          </div>
+          <div class="meter-track">
+            <div class="meter-fill mp" id="mp-bar-fill" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="meter-box">
+          <div class="meter-labels">
+            <span class="meter-name xp">EXP PROGRESSION</span>
+            <span class="meter-val" id="xp-text">0 / 100 XP (0%)</span>
+          </div>
+          <div class="meter-track">
+            <div class="meter-fill xp" id="xp-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PENALTY ZONE ALERT -->
+    <div class="penalty-zone-banner hidden" id="penalty-zone-banner">
+      <div class="penalty-content">
+        <span class="penalty-icon">⚠️</span>
+        <div>
+          <div class="penalty-title">SYSTEM ALERT: PENALTY ZONE ENGAGED</div>
+          <div class="penalty-desc">Daily quests were not cleared in time. You have entered the Penalty Zone. Complete 15 minutes of emergency training to escape.</div>
+        </div>
+      </div>
+      <button class="btn-penalty" id="btn-resolve-penalty">COMPLETE SURVIVAL TRIAL</button>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="system-nav">
+      <button class="nav-tab active" data-tab="status">📊 STATUS</button>
+      <button class="nav-tab" data-tab="quests">📜 QUESTS</button>
+      <button class="nav-tab" data-tab="dungeons">🌌 DUNGEONS</button>
+      <button class="nav-tab" data-tab="shadows">👥 SHADOW ARMY</button>
+      <button class="nav-tab" data-tab="shop">💎 SHOP</button>
+      <button class="nav-tab" data-tab="settings">⚙️ SETTINGS</button>
+    </nav>
+
+    <!-- MAIN PANELS -->
+    <main class="main-content">
+      <!-- 1. STATUS TAB -->
+      <section class="tab-panel" id="tab-status">
+        <div class="points-alert-banner hidden" id="points-alert-banner">
+          <span class="points-text">⚡ [LEVEL UP BONUS] You have <strong id="unallocated-points-val">0</strong> unallocated stat points available!</span>
+        </div>
+
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">⚔️ HUNTER STATUS WINDOW</h2>
+            <span class="player-title" id="status-hunter-class">SYSTEM RECIPIENT</span>
+          </div>
+
+          <div class="status-grid">
+            <!-- 3D Mana Core Viewport -->
+            <div class="mana-core-container">
+              <div id="mana-core-3d"></div>
+              <span class="core-hud-label">⚡ 3D MANA RESONANCE CORE</span>
+            </div>
+
+            <!-- Stat Radar Pentagon -->
+            <div class="radar-container">
+              <canvas id="radar-canvas" width="340" height="300"></canvas>
+            </div>
+
+            <!-- Stat Allocations -->
+            <div class="stats-list" id="stats-list"></div>
+          </div>
+        </div>
+
+        <!-- Hunter Titles & Milestones -->
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">🎖️ ACHIEVED TITLES</h2>
+          </div>
+          <div class="titles-list" id="titles-list"></div>
+        </div>
+      </section>
+
+      <!-- 2. QUESTS TAB -->
+      <section class="tab-panel hidden" id="tab-quests">
+        <!-- Configurable Daily Physical Regimen -->
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">⚔️ [DAILY QUEST: GETTING READY TO BECOME STRONG]</h2>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-action" id="btn-add-regimen">+ Add Exercise</button>
+              <button class="btn-action btn-muted" id="btn-reset-regimen" title="Restore default pushups, situps, squats, running">↺ Defaults</button>
+            </div>
+          </div>
+
+          <div class="regimen-grid" id="regimen-items-container"></div>
+        </div>
+
+        <!-- Custom Daily Habit Quests -->
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">📜 CUSTOM DAILY QUESTS & HABITS</h2>
+            <button class="btn-action" id="btn-open-add-quest">+ Accept New Daily Quest</button>
+          </div>
+          <div class="custom-quests-list" id="custom-quests-list"></div>
+        </div>
+      </section>
+
+      <!-- 3. DUNGEONS TAB -->
+      <section class="tab-panel hidden" id="tab-dungeons">
+        <!-- 3D Dimensional Gate Portal Banner -->
+        <div class="gate-portal-banner card-3d-tilt">
+          <span class="gate-portal-tag" id="gate-portal-rank-tag">DIMENSIONAL GATE VORTEX</span>
+          <div id="gate-portal-3d"></div>
+        </div>
+
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">🌌 ACTIVE DUNGEON GATES (PROJECTS & RAIDS)</h2>
+            <button class="btn-action" id="btn-open-add-dungeon">⚡ Manifest Dungeon Gate</button>
+          </div>
+          <div class="dungeons-list" id="dungeons-list"></div>
+        </div>
+      </section>
+
+      <!-- 4. SHADOW ARMY TAB -->
+      <section class="tab-panel hidden" id="tab-shadows">
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">👥 SHADOW MONARCH'S DOMAIN (<span id="shadow-count">0</span> SOLDIERS)</h2>
+            <span class="player-title">"ARISE" FROM OVERCOME CHALLENGES</span>
+          </div>
+          <div class="shadows-grid" id="shadows-grid"></div>
+        </div>
+      </section>
+
+      <!-- 5. SHOP & INVENTORY TAB -->
+      <section class="tab-panel hidden" id="tab-shop">
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">🏪 HUNTER REWARD SHOP</h2>
+            <button class="btn-action" id="btn-open-add-shop">+ Add Custom Real-Life Reward</button>
+          </div>
+          <div class="shop-items-grid" id="shop-items-grid"></div>
+        </div>
+
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">🎒 INVENTORY & CLAIMED REWARDS</h2>
+          </div>
+          <div class="inventory-list" id="inventory-list"></div>
+        </div>
+      </section>
+
+      <!-- 6. SETTINGS TAB -->
+      <section class="tab-panel hidden" id="tab-settings">
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">⚙️ SYSTEM PROTOCOLS & CONFIGURATION</h2>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 20px; max-width: 500px;">
+            <div class="form-group">
+              <label class="form-label">Hunter Name</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" class="form-input" id="profile-name-input" placeholder="Hunter Name" />
+                <button class="btn-action" id="btn-save-name">Save</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Sound Effects</label>
+              <button class="btn-action btn-cyan" id="sound-toggle-btn">Sound: ENABLED</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Manual Penalty Zone Simulation</label>
+              <button class="btn-action btn-muted" id="btn-test-penalty">⚠️ Test Penalty Zone Warning</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Backup & Restore</label>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn-action" id="btn-export-backup">💾 Export JSON Save</button>
+                <button class="btn-action btn-muted" id="btn-import-backup">📂 Restore JSON Save</button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+              <label class="form-label" style="color: var(--crimson);">Danger Zone</label>
+              <button class="btn-action" style="border-color: var(--crimson); color: var(--crimson);" id="btn-reset-system">Reset All Progress (Start New Journey)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="system-toast" id="system-toast">Notification</div>
+
+  <!-- ICONIC SYSTEM MODAL -->
+  <div class="modal-overlay hidden" id="system-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">SYSTEM NOTIFICATION</span>
+      </div>
+      <div class="modal-body" id="modal-body">Message content here.</div>
+      <div class="modal-footer">
+        <button class="btn-action btn-cyan" id="modal-confirm-btn">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CUSTOM QUEST MODAL -->
+  <div class="modal-overlay hidden" id="add-quest-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">+ ACCEPT NEW DAILY QUEST</span>
+        <button class="btn-close-modal" id="btn-close-add-quest">✕</button>
+      </div>
+      <form id="form-add-quest">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Quest / Habit Title</label>
+            <input type="text" class="form-input" id="quest-input-title" placeholder="e.g. Read 20 pages of Book" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Associated Stat Bonus</label>
+              <select class="form-select" id="quest-select-stat">
+                <option value="int">INT (Intelligence / Learning)</option>
+                <option value="str">STR (Strength / Fitness)</option>
+                <option value="agi">AGI (Agility / Speed & Chores)</option>
+                <option value="vit">VIT (Vitality / Health & Rest)</option>
+                <option value="per">PER (Perception / Mindfulness)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <input type="text" class="form-input" id="quest-input-category" placeholder="e.g. Study, Health, Chores" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">EXP Reward</label>
+              <input type="number" class="form-input" id="quest-input-xp" value="35" min="5" max="500" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gold Reward</label>
+              <input type="number" class="form-input" id="quest-input-gold" value="20" min="5" max="500" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-action btn-cyan">Accept Quest</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT CUSTOM QUEST MODAL -->
+  <div class="modal-overlay hidden" id="edit-quest-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">✏️ CONFIGURE DAILY QUEST</span>
+        <button class="btn-close-modal" id="btn-close-edit-quest">✕</button>
+      </div>
+      <form id="form-edit-quest">
+        <input type="hidden" id="quest-edit-id" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Quest Title</label>
+            <input type="text" class="form-input" id="quest-edit-title" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Associated Stat</label>
+              <select class="form-select" id="quest-edit-stat">
+                <option value="int">INT (Intelligence)</option>
+                <option value="str">STR (Strength)</option>
+                <option value="agi">AGI (Agility)</option>
+                <option value="vit">VIT (Vitality)</option>
+                <option value="per">PER (Perception)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <input type="text" class="form-input" id="quest-edit-category" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">EXP Reward</label>
+              <input type="number" class="form-input" id="quest-edit-xp" min="5" max="500" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gold Reward</label>
+              <input type="number" class="form-input" id="quest-edit-gold" min="5" max="500" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-action btn-cyan">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT REGIMEN EXERCISE MODAL -->
+  <div class="modal-overlay hidden" id="edit-regimen-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="regimen-modal-title">⚙️ CONFIGURE CONDITIONING EXERCISE</span>
+        <button class="btn-close-modal" id="btn-close-edit-regimen">✕</button>
+      </div>
+      <form id="form-edit-regimen">
+        <input type="hidden" id="regimen-edit-id" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Exercise Name</label>
+            <input type="text" class="form-input" id="regimen-input-label" placeholder="e.g. Pull-ups, Push-ups, Planks" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Target Goal</label>
+              <input type="number" class="form-input" id="regimen-input-target" min="1" max="5000" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit of Measure</label>
+              <input type="text" class="form-input" id="regimen-input-unit" placeholder="reps, km, secs, mins" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Icon Emoji</label>
+              <input type="text" class="form-input" id="regimen-input-icon" value="💪" maxlength="4" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Associated Stat</label>
+              <select class="form-select" id="regimen-select-stat">
+                <option value="str">STR (Strength)</option>
+                <option value="agi">AGI (Agility)</option>
+                <option value="vit">VIT (Vitality)</option>
+                <option value="int">INT (Intelligence)</option>
+                <option value="per">PER (Perception)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-action btn-cyan">Save Exercise</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MANAGE DUNGEON GATE TASKS MODAL -->
+  <div class="modal-overlay hidden" id="manage-gate-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="manage-gate-title">⚙️ MANAGE GATE OBJECTIVES</span>
+        <button class="btn-close-modal" id="btn-close-manage-gate">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Add New Milestone Objective</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" class="form-input" id="input-new-milestone-task" placeholder="New milestone objective..." style="flex:1;" />
+            <button class="btn-action" id="btn-add-milestone-task">+ Add</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Active Milestones (Edit text or remove)</label>
+          <div id="manage-gate-tasks-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-cyan" id="btn-done-manage-gate" onclick="document.getElementById('btn-close-manage-gate').click()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE DUNGEON GATE MODAL -->
+  <div class="modal-overlay hidden" id="add-dungeon-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">⚡ MANIFEST DUNGEON GATE (PROJECT RAID)</span>
+        <button class="btn-close-modal" id="btn-close-add-dungeon">✕</button>
+      </div>
+      <form id="form-add-dungeon">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Gate Title / Project Name</label>
+            <input type="text" class="form-input" id="dungeon-input-title" placeholder="e.g. Conquer Python Certification" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gate Threat Rank</label>
+            <select class="form-select" id="dungeon-select-rank">
+              <option value="E">E-Rank (Minor Task / Quick Sprint)</option>
+              <option value="D" selected>D-Rank (Standard Project / Multi-step)</option>
+              <option value="C">C-Rank (Medium Milestone / 1-Week Goal)</option>
+              <option value="B">B-Rank (Challenging Milestone / Multi-Week)</option>
+              <option value="A">A-Rank (Epic Milestone / Monthly Project)</option>
+              <option value="S">S-Rank (Colossal Transformation / Final Boss)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description / Stakes</label>
+            <input type="text" class="form-input" id="dungeon-input-desc" placeholder="What will this victory achieve?" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Raid Milestones / Sub-Tasks (1 per line)</label>
+            <textarea class="form-textarea" id="dungeon-input-tasks" placeholder="Module 1 completed&#10;Practice questions done&#10;Final exam passed" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-action btn-cyan">Open Dungeon Gate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SHADOW EXTRACTION "ARISE" MODAL -->
+  <div class="modal-overlay hidden" id="arise-modal">
+    <div class="modal-box" style="border-color: var(--purple); box-shadow: 0 0 35px rgba(168, 85, 247, 0.6);">
+      <div class="modal-header">
+        <span class="modal-title" style="color: #d8b4fe;">⚡ SHADOW EXTRACTION: "ARISE"</span>
+      </div>
+      <div class="modal-body">
+        <p>A lingering soul remains from the defeated gate: <strong id="arise-boss-name" style="color: #fff;">Boss</strong>.</p>
+        <p style="color: #c084fc; font-style: italic;">"Speak the command of the Monarch to raise this conquered achievement into your eternal Shadow Army."</p>
+        
+        <div class="form-group">
+          <label class="form-label" style="color: #d8b4fe;">Assigned Rank</label>
+          <div id="arise-shadow-rank" style="font-family: var(--font-mono); color: #fff; font-weight: bold;">Shadow Soldier</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="color: #d8b4fe;">Shadow Soldier Name</label>
+          <input type="text" class="form-input" id="arise-shadow-name" placeholder="Name your shadow" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-muted" id="btn-cancel-arise">Leave to Dust</button>
+        <button class="btn-action" style="background: var(--purple); color: #fff; border-color: var(--purple);" id="btn-confirm-arise">⚡ ARISE!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD SHOP ITEM MODAL -->
+  <div class="modal-overlay hidden" id="add-shop-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">+ ADD REAL-LIFE REWARD</span>
+        <button class="btn-close-modal" id="btn-close-add-shop">✕</button>
+      </div>
+      <form id="form-add-shop">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Reward Name</label>
+            <input type="text" class="form-input" id="shop-input-name" placeholder="e.g. 1 Hour Video Game Session" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Gold Cost</label>
+              <input type="number" class="form-input" id="shop-input-cost" value="100" min="10" max="10000" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Icon Emoji</label>
+              <input type="text" class="form-input" id="shop-input-icon" value="🎮" maxlength="4" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input type="text" class="form-input" id="shop-input-cat" placeholder="Leisure, Food, Gear, Rest" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-action btn-cyan">Add to Shop</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CORE SCRIPTS -->
+  <script src="js/models.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/quests.js"></script>
+  <script src="js/dungeons.js"></script>
+  <script src="js/shadows.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
