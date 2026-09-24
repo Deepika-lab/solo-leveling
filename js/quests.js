@@ -136,19 +136,19 @@ class QuestManager {
   checkEntireRegimenCompletion() {
     if (!this.state.regimenClearedToday && this.isRegimenFullyComplete()) {
       this.state.regimenClearedToday = true;
-      window.systemAudio.playLevelUp();
-      this.app.triggerScreenShake();
-      this.app.showModalNotification(
-        "QUEST COMPLETED: [DAILY QUEST: PREPARATION TO BECOME STRONG]",
-        "All conditioning regimens cleared!\n\nREWARDS GRANTED:\n• +120 EXP\n• +60 Hunter Gold\n• Full HP/MP Recovery\n• Stat Growth Surge",
-        () => {
-          this.state.currentXp += 120;
-          this.state.gold += 60;
-          this.app.healToFull();
-          this.app.checkLevelUp();
-          this.app.persistAndRender();
-        }
-      );
+      this.state.currentXp += 120;
+      this.state.gold += 60;
+      this.app.healToFull();
+      this.app.checkLevelUp();
+
+      // Record cleared date in consistency history
+      const today = typeof StorageManager !== 'undefined' ? StorageManager.getTodayString() : new Date().toISOString().split('T')[0];
+      this.state.history = this.state.history || {};
+      this.state.history[today] = { cleared: true, date: today };
+
+      // Trigger the Blessed Random Box Ceremony!
+      this.app.openBlessedLootbox();
+      this.app.persistAndRender();
     }
   }
 

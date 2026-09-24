@@ -1276,3 +1276,492 @@
   font-weight: 700;
   text-shadow: 0 0 8px var(--cyan);
 }
+
+/* ==========================================================================
+   7-DAY CONSISTENCY MATRIX
+   ========================================================================== */
+.streak-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.matrix-day-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10, 18, 33, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 6px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.matrix-day-card.today {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+}
+
+.matrix-day-card.cleared {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.matrix-day-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.matrix-day-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s;
+}
+
+.matrix-day-card.cleared .matrix-day-dot {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.matrix-day-card.missed .matrix-day-dot {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--crimson);
+  color: var(--crimson);
+}
+
+.matrix-day-card.today .matrix-day-dot {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.matrix-day-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   BLESSED RANDOM BOX MODAL
+   ========================================================================== */
+.lootbox-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(3, 7, 18, 0.94);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.lootbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  max-width: 520px;
+  width: 90%;
+  padding: 36px 28px;
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.2) 0%, rgba(10, 18, 33, 0.95) 75%);
+  border: 2px solid var(--purple);
+  box-shadow: 0 0 50px rgba(168, 85, 247, 0.5);
+  border-radius: 12px;
+  animation: levelUpPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lootbox-system-tag {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.lootbox-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+}
+
+.lootbox-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.lootbox-chest-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.chest-aura {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%);
+  animation: pulse-danger 2s infinite ease-in-out;
+}
+
+.chest-box {
+  font-size: 72px;
+  z-index: 2;
+  filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.6));
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chest-box.shaking {
+  animation: chestRumble 0.6s infinite ease-in-out;
+}
+
+@keyframes chestRumble {
+  0% { transform: scale(1) rotate(0deg); }
+  20% { transform: scale(1.15) rotate(-8deg); }
+  40% { transform: scale(1.15) rotate(8deg); }
+  60% { transform: scale(1.2) rotate(-5deg); }
+  80% { transform: scale(1.2) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.lootbox-reward-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(5, 8, 17, 0.85);
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  padding: 16px 24px;
+  width: 100%;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.reveal-banner {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.reveal-item-icon { font-size: 40px; }
+.reveal-item-name { font-size: 18px; font-weight: 800; color: #fff; }
+.reveal-item-desc { font-size: 12px; color: var(--text-dim); }
+
+.btn-open-lootbox {
+  background: linear-gradient(135deg, var(--gold), #d97706);
+  border: none;
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  padding: 14px 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+  letter-spacing: 1.5px;
+  transition: all 0.2s ease;
+}
+
+.btn-open-lootbox:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.9);
+}
+
+/* ==========================================================================
+   PENALTY SURVIVAL CHAMBER
+   ========================================================================== */
+.penalty-modal-box {
+  border-color: var(--crimson) !important;
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.5) !important;
+  max-width: 600px;
+}
+
+.penalty-arena-header {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), rgba(153, 27, 27, 0.3), rgba(239, 68, 68, 0.15));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.penalty-warning-title {
+  color: var(--crimson);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.penalty-warning-desc {
+  font-size: 12px;
+  color: #fca5a5;
+  line-height: 1.5;
+}
+
+.penalty-tab-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-penalty-tab {
+  flex: 1;
+  background: rgba(10, 18, 33, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-penalty-tab.active {
+  border-color: var(--crimson);
+  color: #fff;
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.survival-ring-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.survival-ring-svg {
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 8;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: var(--crimson);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 427.26;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.5s ease;
+  filter: drop-shadow(0 0 8px var(--crimson));
+}
+
+.survival-ring-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.survival-ring-time {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.survival-ring-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--crimson);
+  letter-spacing: 2px;
+}
+
+.penalty-timer-instructions {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.penalty-timer-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Agility Reflex Trial */
+.evasion-game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.evasion-score-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 8px 12px;
+  background: rgba(5, 8, 17, 0.6);
+  border-radius: 4px;
+}
+
+.evasion-lanes-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  height: 120px;
+}
+
+.evasion-lane {
+  background: rgba(10, 18, 33, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.lane-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.lane-warning {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+  transition: all 0.15s;
+}
+
+.lane-warning.active {
+  background: rgba(239, 68, 68, 0.4);
+  box-shadow: inset 0 0 20px var(--crimson);
+}
+
+.lane-warning.active::after {
+  content: '⚠️ STRIKE!';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 10px var(--crimson);
+  white-space: nowrap;
+}
+
+.evasion-buttons-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.btn-evade-lane {
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--cyan);
+  color: #fff;
+  padding: 10px 4px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-evade-lane:hover, .btn-evade-lane:active {
+  background: var(--cyan);
+  color: #000;
+  box-shadow: 0 0 12px var(--cyan);
+}
+
+/* ==========================================================================
+   MOBILE NATIVE BOTTOM NAVIGATION DOCK
+   ========================================================================== */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 80px;
+  }
+
+  .system-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-top: 1px solid rgba(0, 240, 255, 0.3);
+    background: rgba(4, 9, 20, 0.95);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px)) 6px;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.8), 0 -1px 0 rgba(0, 240, 255, 0.2);
+    justify-content: space-around;
+  }
+
+  .nav-tab {
+    flex-direction: column;
+    font-size: 10px;
+    padding: 6px 2px;
+    min-width: unset;
+    gap: 2px;
+  }
+
+  .streak-matrix-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .matrix-day-card {
+    padding: 8px 2px;
+  }
+
+  .matrix-day-dot {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+}

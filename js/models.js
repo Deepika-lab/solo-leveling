@@ -39,6 +39,10 @@ const DEFAULT_TITLES = [
 ];
 
 const DEFAULT_PRESET_REWARDS = [
+  { id: 'reward_pot_hp', name: 'Lesser Healing Potion', cost: 40, icon: '🧪', category: 'Consumable', type: 'hp_potion', healAmount: 100 },
+  { id: 'reward_pot_mp', name: 'Mana Spring Water', cost: 35, icon: '🔮', category: 'Consumable', type: 'mp_potion', manaAmount: 100 },
+  { id: 'reward_scroll_xp', name: 'Hunter EXP Scroll', cost: 120, icon: '📜', category: 'Consumable', type: 'xp_scroll', xpAmount: 80 },
+  { id: 'reward_elixir_stat', name: 'Stat Awakening Elixir', cost: 300, icon: '✨', category: 'Consumable', type: 'stat_elixir' },
   { id: 'reward_1', name: '1 Hour Gaming / Netflix', cost: 100, icon: '🎮', category: 'Leisure' },
   { id: 'reward_2', name: 'Gourmet / Cheat Meal', cost: 250, icon: '🍜', category: 'Treat' },
   { id: 'reward_3', name: 'Buy a New Book / Gadget', cost: 600, icon: '📚', category: 'Reward' },

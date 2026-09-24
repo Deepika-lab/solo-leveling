@@ -422,8 +422,51 @@ class SoloLevelingApp {
     });
 
     this.drawStatRadarChart();
+    this.renderStreakMatrix();
     this.renderClassesList();
     this.renderTitlesList();
+  }
+
+  renderStreakMatrix() {
+    const grid = document.getElementById('streak-matrix-grid');
+    const streakCountEl = document.getElementById('matrix-streak-count');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (streakCountEl) {
+      streakCountEl.innerText = `${this.state.streak || 0} DAYS`;
+    }
+
+    const todayStr = typeof StorageManager !== 'undefined' ? StorageManager.getTodayString() : new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dayName = dayNames[d.getDay()];
+      const isToday = (dateStr === todayStr);
+
+      const historyEntry = (this.state.history && this.state.history[dateStr]);
+      const isCleared = historyEntry ? historyEntry.cleared : (isToday && this.state.regimenClearedToday);
+      const isMissed = !isToday && (!historyEntry || !historyEntry.cleared) && (new Date(dateStr) < new Date(todayStr));
+
+      const card = document.createElement('div');
+      card.className = `matrix-day-card ${isToday ? 'today' : ''} ${isCleared ? 'cleared' : ''} ${isMissed ? 'missed' : ''}`;
+      
+      let statusIcon = '○';
+      if (isCleared) statusIcon = '✓';
+      else if (isMissed) statusIcon = '✕';
+      else if (isToday) statusIcon = '⏳';
+
+      card.innerHTML = `
+        <span class="matrix-day-name">${isToday ? 'TODAY' : dayName}</span>
+        <div class="matrix-day-dot">${statusIcon}</div>
+        <span class="matrix-day-date">${d.getMonth() + 1}/${d.getDate()}</span>
+      `;
+      grid.appendChild(card);
+    }
   }
 
   renderClassesList() {
@@ -786,7 +829,7 @@ class SoloLevelingApp {
         </div>
         <div class="inv-actions">
           ${!inv.used ? `
-            <button class="btn-redeem" data-id="${inv.id}">Redeem Now</button>
+            <button class="btn-redeem" data-id="${inv.id}">${(inv.type || inv.name.includes('Potion') || inv.name.includes('Elixir') || inv.name.includes('Scroll')) ? '⚡ Use Item' : 'Redeem Now'}</button>
           ` : `
             <span class="badge-redeemed">✓ CLAIMED</span>
           `}
@@ -1109,7 +1152,7 @@ class SoloLevelingApp {
     const btnResolvePenalty = document.getElementById('btn-resolve-penalty');
     if (btnResolvePenalty) {
       btnResolvePenalty.addEventListener('click', () => {
-        this.quests.resolvePenaltyZone();
+        this.openPenaltySurvivalModal();
       });
     }
 
@@ -1183,6 +1226,403 @@ class SoloLevelingApp {
         this.quests.triggerManualPenaltyTest();
       });
     }
+
+    // Blessed Lootbox Modal Listeners
+    const btnOpenLootbox = document.getElementById('btn-open-lootbox');
+    if (btnOpenLootbox) {
+      btnOpenLootbox.addEventListener('click', () => {
+        this.unsealLootbox();
+      });
+    }
+    const btnClaimLootbox = document.getElementById('btn-claim-lootbox');
+    if (btnClaimLootbox) {
+      btnClaimLootbox.addEventListener('click', () => {
+        this.claimLootboxReward();
+      });
+    }
+
+    // Penalty Survival Chamber Modal Listeners
+    const btnClosePenaltyModal = document.getElementById('btn-close-penalty-modal');
+    if (btnClosePenaltyModal) {
+      btnClosePenaltyModal.addEventListener('click', () => {
+        this.closePenaltySurvivalModal();
+      });
+    }
+    const tabBtnTimer = document.getElementById('tab-btn-timer');
+    if (tabBtnTimer) {
+      tabBtnTimer.addEventListener('click', () => {
+        this.switchPenaltyMode('timer');
+      });
+    }
+    const tabBtnEvasion = document.getElementById('tab-btn-evasion');
+    if (tabBtnEvasion) {
+      tabBtnEvasion.addEventListener('click', () => {
+        this.switchPenaltyMode('evasion');
+      });
+    }
+    const btnStartSurvivalTimer = document.getElementById('btn-start-survival-timer');
+    if (btnStartSurvivalTimer) {
+      btnStartSurvivalTimer.addEventListener('click', () => {
+        this.startSurvivalTimer();
+      });
+    }
+    const btnPauseSurvivalTimer = document.getElementById('btn-pause-survival-timer');
+    if (btnPauseSurvivalTimer) {
+      btnPauseSurvivalTimer.addEventListener('click', () => {
+        this.pauseSurvivalTimer();
+      });
+    }
+    const btnInstantEscapePenalty = document.getElementById('btn-instant-escape-penalty');
+    if (btnInstantEscapePenalty) {
+      btnInstantEscapePenalty.addEventListener('click', () => {
+        this.completePenaltySurvival();
+      });
+    }
+    const btnStartEvasionGame = document.getElementById('btn-start-evasion-game');
+    if (btnStartEvasionGame) {
+      btnStartEvasionGame.addEventListener('click', () => {
+        this.startEvasionGame();
+      });
+    }
+    document.querySelectorAll('.btn-evade-lane').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const lane = parseInt(e.currentTarget.getAttribute('data-lane'));
+        this.handleLaneDodge(lane);
+      });
+    });
+  }
+
+  // BLESSED RANDOM BOX HANDLERS
+  openBlessedLootbox() {
+    window.systemAudio.playSystemAlert();
+    this.triggerScreenShake();
+
+    const modal = document.getElementById('lootbox-modal');
+    const chestBox = document.getElementById('lootbox-icon');
+    const revealBox = document.getElementById('lootbox-reveal');
+    const btnOpen = document.getElementById('btn-open-lootbox');
+    const btnClaim = document.getElementById('btn-claim-lootbox');
+
+    if (!modal) return;
+
+    chestBox.innerText = '🎁';
+    chestBox.classList.remove('shaking');
+    revealBox.classList.add('hidden');
+    btnOpen.classList.remove('hidden');
+    btnClaim.classList.add('hidden');
+
+    this.pendingLootReward = null;
+    modal.classList.remove('hidden');
+  }
+
+  unsealLootbox() {
+    const chestBox = document.getElementById('lootbox-icon');
+    const revealBox = document.getElementById('lootbox-reveal');
+    const btnOpen = document.getElementById('btn-open-lootbox');
+    const btnClaim = document.getElementById('btn-claim-lootbox');
+
+    btnOpen.classList.add('hidden');
+    chestBox.classList.add('shaking');
+    window.systemAudio.playLootOpen();
+
+    setTimeout(() => {
+      chestBox.classList.remove('shaking');
+      this.triggerScreenShake();
+
+      const lootTable = [
+        {
+          id: 'pot_ancient_hp',
+          name: 'Ancient Full Recovery Elixir',
+          icon: '🧪',
+          desc: 'Restores 150 HP immediately. Stored in your Inventory.',
+          type: 'hp_potion',
+          healAmount: 150
+        },
+        {
+          id: 'pot_mana_spring',
+          name: 'Pure Mana Spring Core',
+          icon: '🔮',
+          desc: 'Restores 150 MP immediately. Stored in your Inventory.',
+          type: 'mp_potion',
+          manaAmount: 150
+        },
+        {
+          id: 'scroll_forbidden_xp',
+          name: "Monarch's Forbidden Scroll",
+          icon: '📜',
+          desc: 'Immediately bestows +100 bonus EXP upon the Hunter.',
+          grantXp: 100
+        },
+        {
+          id: 'gold_vault',
+          name: 'Dungeon Vault of Gold (+150🪙)',
+          icon: '🪙',
+          desc: 'An influx of 150 Hunter Gold directly into your coffer.',
+          grantGold: 150
+        },
+        {
+          id: 'crystals_cache',
+          name: 'High-Purity Mana Crystals (+10💎)',
+          icon: '💎',
+          desc: 'Awarded 10 shimmering Mana Crystals.',
+          grantCrystals: 10
+        },
+        {
+          id: 'stat_essence',
+          name: 'Essence of Transcendent Power (+1 Stat)',
+          icon: '✨',
+          desc: 'Surges your biological limits. Grants +1 unallocated stat point!',
+          grantStatPoint: 1
+        }
+      ];
+
+      const reward = lootTable[Math.floor(Math.random() * lootTable.length)];
+      this.pendingLootReward = reward;
+
+      chestBox.innerText = reward.icon;
+      document.getElementById('lootbox-reward-icon').innerText = reward.icon;
+      document.getElementById('lootbox-reward-name').innerText = reward.name;
+      document.getElementById('lootbox-reward-desc').innerText = reward.desc;
+
+      revealBox.classList.remove('hidden');
+      btnClaim.classList.remove('hidden');
+    }, 1100);
+  }
+
+  claimLootboxReward() {
+    const modal = document.getElementById('lootbox-modal');
+    if (!this.pendingLootReward) {
+      if (modal) modal.classList.add('hidden');
+      return;
+    }
+
+    const r = this.pendingLootReward;
+    if (r.grantXp) {
+      this.state.currentXp += r.grantXp;
+      this.showNotification(`[REWARD CLAIMED] +${r.grantXp} EXP added!`);
+      this.checkLevelUp();
+    } else if (r.grantGold) {
+      this.state.gold += r.grantGold;
+      this.showNotification(`[REWARD CLAIMED] +${r.grantGold} Gold added!`);
+    } else if (r.grantCrystals) {
+      this.state.crystals += r.grantCrystals;
+      this.showNotification(`[REWARD CLAIMED] +${r.grantCrystals} Crystals added!`);
+    } else if (r.grantStatPoint) {
+      this.state.unallocatedPoints += r.grantStatPoint;
+      this.showNotification(`[REWARD CLAIMED] +1 Unallocated Stat Point!`);
+    } else if (r.type) {
+      this.state.inventory = this.state.inventory || [];
+      this.state.inventory.unshift({
+        id: 'inv_' + Date.now(),
+        name: r.name,
+        icon: r.icon,
+        category: 'Consumable',
+        boughtAt: new Date().toLocaleDateString(),
+        used: false,
+        type: r.type,
+        healAmount: r.healAmount,
+        manaAmount: r.manaAmount
+      });
+      this.showNotification(`[INVENTORY] Stored "${r.name}" in your Inventory!`);
+    }
+
+    this.pendingLootReward = null;
+    if (modal) modal.classList.add('hidden');
+    window.systemAudio.playQuestComplete();
+    this.persistAndRender();
+  }
+
+  // PENALTY SURVIVAL CHAMBER HANDLERS
+  openPenaltySurvivalModal() {
+    window.systemAudio.playWarning();
+    this.triggerScreenShake();
+    const modal = document.getElementById('penalty-survival-modal');
+    if (modal) modal.classList.remove('hidden');
+    this.switchPenaltyMode('timer');
+  }
+
+  closePenaltySurvivalModal() {
+    this.pauseSurvivalTimer();
+    this.stopEvasionGame();
+    const modal = document.getElementById('penalty-survival-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  switchPenaltyMode(mode) {
+    const btnTimer = document.getElementById('tab-btn-timer');
+    const btnEvasion = document.getElementById('tab-btn-evasion');
+    const panelTimer = document.getElementById('penalty-subpanel-timer');
+    const panelEvasion = document.getElementById('penalty-subpanel-evasion');
+
+    if (mode === 'timer') {
+      if (btnTimer) btnTimer.classList.add('active');
+      if (btnEvasion) btnEvasion.classList.remove('active');
+      if (panelTimer) panelTimer.classList.remove('hidden');
+      if (panelEvasion) panelEvasion.classList.add('hidden');
+      this.stopEvasionGame();
+    } else {
+      if (btnTimer) btnTimer.classList.remove('active');
+      if (btnEvasion) btnEvasion.classList.add('active');
+      if (panelTimer) panelTimer.classList.add('hidden');
+      if (panelEvasion) panelEvasion.classList.remove('hidden');
+      this.pauseSurvivalTimer();
+    }
+  }
+
+  startSurvivalTimer() {
+    if (this.survivalTimerInterval) return;
+    this.survivalDuration = this.survivalDuration || 180;
+    this.survivalRemaining = (this.survivalRemaining !== undefined) ? this.survivalRemaining : this.survivalDuration;
+
+    const startBtn = document.getElementById('btn-start-survival-timer');
+    const pauseBtn = document.getElementById('btn-pause-survival-timer');
+    const statusLabel = document.getElementById('survival-status-label');
+    if (startBtn) startBtn.classList.add('hidden');
+    if (pauseBtn) pauseBtn.classList.remove('hidden');
+    if (statusLabel) {
+      statusLabel.innerText = 'SURVIVING...';
+      statusLabel.style.color = '#ef4444';
+    }
+
+    this.survivalTimerInterval = setInterval(() => {
+      this.survivalRemaining--;
+      this.updateSurvivalTimerUI();
+
+      if (this.survivalRemaining <= 0) {
+        clearInterval(this.survivalTimerInterval);
+        this.survivalTimerInterval = null;
+        this.completePenaltySurvival();
+      }
+    }, 1000);
+  }
+
+  pauseSurvivalTimer() {
+    if (this.survivalTimerInterval) {
+      clearInterval(this.survivalTimerInterval);
+      this.survivalTimerInterval = null;
+    }
+    const startBtn = document.getElementById('btn-start-survival-timer');
+    const pauseBtn = document.getElementById('btn-pause-survival-timer');
+    const statusLabel = document.getElementById('survival-status-label');
+    if (startBtn) {
+      startBtn.classList.remove('hidden');
+      startBtn.innerText = '▶ RESUME TIMER';
+    }
+    if (pauseBtn) pauseBtn.classList.add('hidden');
+    if (statusLabel) {
+      statusLabel.innerText = 'PAUSED';
+      statusLabel.style.color = 'var(--gold)';
+    }
+  }
+
+  updateSurvivalTimerUI() {
+    const textEl = document.getElementById('survival-timer-text');
+    const ringEl = document.getElementById('survival-ring-fill');
+    if (!textEl || !ringEl) return;
+
+    const total = this.survivalDuration || 180;
+    const rem = Math.max(0, this.survivalRemaining);
+    const mins = Math.floor(rem / 60);
+    const secs = rem % 60;
+    textEl.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    const circumference = 427.26;
+    const progress = (total - rem) / total;
+    const offset = circumference * (1 - progress);
+    ringEl.style.strokeDashoffset = offset;
+  }
+
+  startEvasionGame() {
+    this.evasionDodges = 0;
+    this.evasionRequired = 8;
+    this.evasionActive = true;
+    this.evasionIncomingLane = null;
+
+    const startBtn = document.getElementById('btn-start-evasion-game');
+    if (startBtn) startBtn.classList.add('hidden');
+    const statusTag = document.getElementById('evasion-status-tag');
+    if (statusTag) statusTag.innerText = 'DODGE INCOMING ATTACKS!';
+    const scoreDisplay = document.getElementById('evasion-score-display');
+    if (scoreDisplay) scoreDisplay.innerText = `0 / ${this.evasionRequired}`;
+
+    this.scheduleNextEvasionAttack();
+  }
+
+  stopEvasionGame() {
+    this.evasionActive = false;
+    clearTimeout(this.evasionTimeout);
+    clearTimeout(this.strikeTimeout);
+    this.clearLaneWarnings();
+    const startBtn = document.getElementById('btn-start-evasion-game');
+    if (startBtn) startBtn.classList.remove('hidden');
+  }
+
+  scheduleNextEvasionAttack() {
+    if (!this.evasionActive) return;
+    this.clearLaneWarnings();
+
+    this.evasionTimeout = setTimeout(() => {
+      if (!this.evasionActive) return;
+      this.evasionIncomingLane = Math.floor(Math.random() * 3);
+      const warnEl = document.getElementById(`lane-warn-${this.evasionIncomingLane}`);
+      if (warnEl) warnEl.classList.add('active');
+
+      window.systemAudio.playWarning();
+      this.triggerScreenShake();
+
+      this.strikeTimeout = setTimeout(() => {
+        if (!this.evasionActive) return;
+        window.systemAudio.playWarning();
+        this.showNotification("⚠️ [CENTIPEDE STRIKE HIT!] Resetting dodge streak!");
+        this.evasionDodges = Math.max(0, this.evasionDodges - 2);
+        const scoreDisplay = document.getElementById('evasion-score-display');
+        if (scoreDisplay) scoreDisplay.innerText = `${this.evasionDodges} / ${this.evasionRequired}`;
+        this.clearLaneWarnings();
+        this.scheduleNextEvasionAttack();
+      }, 1800);
+    }, 1200);
+  }
+
+  handleLaneDodge(lane) {
+    if (!this.evasionActive || this.evasionIncomingLane === null) return;
+    clearTimeout(this.strikeTimeout);
+
+    if (lane !== this.evasionIncomingLane) {
+      window.systemAudio.playDodge();
+      this.evasionDodges++;
+      const scoreDisplay = document.getElementById('evasion-score-display');
+      if (scoreDisplay) scoreDisplay.innerText = `${this.evasionDodges} / ${this.evasionRequired}`;
+      this.showNotification(`⚡ [DODGED!] Centipede strike evaded! (${this.evasionDodges}/${this.evasionRequired})`);
+
+      if (this.evasionDodges >= this.evasionRequired) {
+        this.stopEvasionGame();
+        this.completePenaltySurvival();
+        return;
+      }
+    } else {
+      window.systemAudio.playWarning();
+      this.triggerScreenShake();
+      this.showNotification("💥 [FAILED DODGE!] You dodged directly into the centipede!");
+      this.evasionDodges = Math.max(0, this.evasionDodges - 1);
+      const scoreDisplay = document.getElementById('evasion-score-display');
+      if (scoreDisplay) scoreDisplay.innerText = `${this.evasionDodges} / ${this.evasionRequired}`;
+    }
+
+    this.clearLaneWarnings();
+    this.scheduleNextEvasionAttack();
+  }
+
+  clearLaneWarnings() {
+    for (let i = 0; i < 3; i++) {
+      const w = document.getElementById(`lane-warn-${i}`);
+      if (w) w.classList.remove('active');
+    }
+    this.evasionIncomingLane = null;
+  }
+
+  completePenaltySurvival() {
+    this.closePenaltySurvivalModal();
+    this.quests.resolvePenaltyZone();
   }
 
   // MODAL HANDLERS

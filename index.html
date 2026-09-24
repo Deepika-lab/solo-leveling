@@ -151,6 +151,15 @@
           </div>
         </div>
 
+        <!-- Hunter Habit & Streak Matrix -->
+        <div class="panel-card card-3d-tilt">
+          <div class="panel-header-row">
+            <h2 class="panel-title">🔥 7-DAY CONSISTENCY MATRIX</h2>
+            <span class="player-title">ACTIVE STREAK: <strong id="matrix-streak-count" style="color: var(--gold);">0 DAYS</strong></span>
+          </div>
+          <div class="streak-matrix-grid" id="streak-matrix-grid"></div>
+        </div>
+
         <!-- Hunter Class Specializations -->
         <div class="panel-card card-3d-tilt">
           <div class="panel-header-row">
@@ -313,6 +322,108 @@
         <div class="celebration-reward-line">✦ SYSTEM AUTHORITY EXPANDED</div>
       </div>
       <button class="btn-celebration-claim" id="btn-claim-levelup">⚡ EMBRACE ASCENSION</button>
+    </div>
+  </div>
+
+  <!-- BLESSED RANDOM BOX MODAL -->
+  <div class="lootbox-overlay hidden" id="lootbox-modal">
+    <div class="lootbox-content">
+      <div class="lootbox-system-tag">★ SYSTEM SPECIAL REWARD ★</div>
+      <div class="lootbox-title">[BLESSED RANDOM BOX]</div>
+      <div class="lootbox-subtitle">Granted by the System for clearing all daily conditioning regimens.</div>
+      
+      <div class="lootbox-chest-container" id="lootbox-chest">
+        <div class="chest-aura"></div>
+        <div class="chest-box" id="lootbox-icon">🎁</div>
+      </div>
+
+      <div class="lootbox-reward-reveal hidden" id="lootbox-reveal">
+        <div class="reveal-banner">✦ REWARD GRANTED ✦</div>
+        <div class="reveal-item-icon" id="lootbox-reward-icon">🧪</div>
+        <div class="reveal-item-name" id="lootbox-reward-name">Ancient Healing Elixir</div>
+        <div class="reveal-item-desc" id="lootbox-reward-desc">Restores 150 HP immediately. Stored in your Inventory.</div>
+      </div>
+
+      <button class="btn-open-lootbox" id="btn-open-lootbox">✨ UNSEAL BLESSED BOX</button>
+      <button class="btn-celebration-claim hidden" id="btn-claim-lootbox">CLAIM REWARD & PROCEED</button>
+    </div>
+  </div>
+
+  <!-- PENALTY SURVIVAL CHAMBER MODAL -->
+  <div class="modal-overlay hidden" id="penalty-survival-modal">
+    <div class="modal-box penalty-modal-box">
+      <div class="modal-header">
+        <span class="modal-title" style="color: var(--crimson);">⚠️ [PENALTY QUEST: DESERT OF CENTIPEDES]</span>
+        <button class="btn-close-modal" id="btn-close-penalty-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="penalty-arena-header">
+          <div class="penalty-warning-title">SURVIVE THE PENALTY ZONE</div>
+          <div class="penalty-warning-desc">
+            You failed to clear your daily conditioning in time. Giant poison centipedes roam these sands. Complete the emergency trial to restore all HP & lift system sanctions.
+          </div>
+        </div>
+
+        <div class="penalty-tab-nav">
+          <button class="btn-penalty-tab active" id="tab-btn-timer">⏱️ Survival Timer</button>
+          <button class="btn-penalty-tab" id="tab-btn-evasion">⚡ Agility Reflex Trial</button>
+        </div>
+
+        <!-- Mode 1: Workout / Focus Timer -->
+        <div class="penalty-subpanel" id="penalty-subpanel-timer">
+          <div class="survival-ring-container">
+            <svg class="survival-ring-svg" width="160" height="160" viewBox="0 0 160 160">
+              <circle class="ring-bg" cx="80" cy="80" r="68" />
+              <circle class="ring-fill" id="survival-ring-fill" cx="80" cy="80" r="68" />
+            </svg>
+            <div class="survival-ring-text">
+              <span class="survival-ring-time" id="survival-timer-text">03:00</span>
+              <span class="survival-ring-status" id="survival-status-label">READY</span>
+            </div>
+          </div>
+          <p class="penalty-timer-instructions">
+            Perform unbroken physical training (pushups/squats) or high-focus concentration until the timer reaches zero.
+          </p>
+          <div class="penalty-timer-actions">
+            <button class="btn-action btn-cyan" id="btn-start-survival-timer">▶ Start Survival Countdown</button>
+            <button class="btn-action btn-muted hidden" id="btn-pause-survival-timer">⏸ Pause</button>
+          </div>
+        </div>
+
+        <!-- Mode 2: Agility Reflex Evasion Mini-Game -->
+        <div class="penalty-subpanel hidden" id="penalty-subpanel-evasion">
+          <div class="evasion-game-board">
+            <div class="evasion-score-row">
+              <span>DODGES COMPLETED: <strong id="evasion-score-display" style="color: var(--cyan);">0 / 8</strong></span>
+              <span id="evasion-status-tag" style="color: var(--gold);">TAP START TO BEGIN</span>
+            </div>
+            <div class="evasion-lanes-row">
+              <div class="evasion-lane" id="evasion-lane-0">
+                <span class="lane-name">LEFT</span>
+                <div class="lane-warning" id="lane-warn-0"></div>
+              </div>
+              <div class="evasion-lane" id="evasion-lane-1">
+                <span class="lane-name">CENTER</span>
+                <div class="lane-warning" id="lane-warn-1"></div>
+              </div>
+              <div class="evasion-lane" id="evasion-lane-2">
+                <span class="lane-name">RIGHT</span>
+                <div class="lane-warning" id="lane-warn-2"></div>
+              </div>
+            </div>
+            <div class="evasion-buttons-row">
+              <button class="btn-evade-lane" data-lane="0">⬅️ DODGE LEFT</button>
+              <button class="btn-evade-lane" data-lane="1">⬇️ DUCK CENTER</button>
+              <button class="btn-evade-lane" data-lane="2">➡️ DODGE RIGHT</button>
+            </div>
+            <button class="btn-action btn-cyan" id="btn-start-evasion-game" style="width: 100%; margin-top: 10px;">⚡ Start Centipede Evasion</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn-action btn-muted" id="btn-instant-escape-penalty">⚡ Override & Complete Sanction</button>
+        <button class="btn-action btn-cyan hidden" id="btn-claim-survival">🏆 CONQUER PENALTY ZONE</button>
+      </div>
     </div>
   </div>
 

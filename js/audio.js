@@ -66,12 +66,14 @@ class SystemAudio {
 
   // Holographic UI button click
   playClick() {
+    this.triggerHaptic(12);
     if (!this.enabled) return;
     this._playTone(1200, 'sine', 0, 0.04, 0.15, 0.001);
   }
 
   // Iconic dual-tone System Alert chime ("DUN-DING!")
   playSystemAlert() {
+    this.triggerHaptic([30, 20, 40]);
     if (!this.enabled) return;
     this._playTone(880, 'sine', 0, 0.12, 0.25, 0.01);
     this._playTone(1320, 'sine', 0.1, 0.3, 0.3, 0.001);
@@ -79,6 +81,7 @@ class SystemAudio {
 
   // Quest Completed sound (crystal chime)
   playQuestComplete() {
+    this.triggerHaptic([40, 30, 80]);
     if (!this.enabled) return;
     const notes = [587.33, 739.99, 880, 1174.66]; // D5, F#5, A5, D6
     notes.forEach((freq, idx) => {
@@ -88,6 +91,7 @@ class SystemAudio {
 
   // Level Up fanfare! Multi-harmonic ascending heroic chime
   playLevelUp() {
+    this.triggerHaptic([80, 50, 80, 50, 150]);
     if (!this.enabled) return;
     const chords = [
       { freq: 440, delay: 0 },
@@ -106,6 +110,7 @@ class SystemAudio {
 
   // Gate Clear (Deep power chord + shimmer)
   playGateClear() {
+    this.triggerHaptic([60, 40, 100]);
     if (!this.enabled) return;
     this._playTone(220, 'sawtooth', 0, 0.6, 0.15, 0.01);
     this._playTone(329.63, 'triangle', 0.1, 0.5, 0.2, 0.01);
@@ -115,6 +120,7 @@ class SystemAudio {
 
   // Penalty / Warning alarm (pulsing warning frequency)
   playWarning() {
+    this.triggerHaptic([150, 80, 150, 80, 250]);
     if (!this.enabled) return;
     this._playTone(400, 'sawtooth', 0, 0.15, 0.2, 0.01);
     this._playTone(350, 'sawtooth', 0.18, 0.25, 0.25, 0.001);
@@ -124,6 +130,7 @@ class SystemAudio {
 
   // Shadow Extraction "ARISE" (Sub-bass rumble + ethereal resonance)
   playArise() {
+    this.triggerHaptic([80, 60, 120, 60, 220]);
     if (!this.enabled) return;
     this.init();
     if (!this.ctx) return;
@@ -155,8 +162,47 @@ class SystemAudio {
   // Stat point allocated
   playStatAllocate() {
     if (!this.enabled) return;
+    this.triggerHaptic(20);
     this._playTone(700, 'sine', 0, 0.08, 0.2, 0.01);
     this._playTone(1050, 'sine', 0.06, 0.12, 0.25, 0.001);
+  }
+
+  // Mobile Haptic Feedback (Vibration API)
+  triggerHaptic(pattern = 20) {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch (e) {
+        // Silently ignore if not supported
+      }
+    }
+  }
+
+  // Mystery Box / Loot Opening
+  playLootOpen() {
+    if (!this.enabled) return;
+    this.triggerHaptic([30, 40, 50, 60, 150]);
+    [300, 450, 600, 800, 1200].forEach((freq, idx) => {
+      this._playTone(freq, 'triangle', idx * 0.08, 0.3, 0.25, 0.001);
+    });
+    this._playTone(1600, 'sine', 0.45, 0.6, 0.3, 0.001);
+  }
+
+  // Potion / Consumable used
+  playPotionConsume() {
+    if (!this.enabled) return;
+    this.triggerHaptic([40, 30, 60]);
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+      this._playTone(freq, 'sine', idx * 0.06, 0.2, 0.2, 0.01);
+    });
+  }
+
+  // Dodge / Evasion in Penalty Zone
+  playDodge() {
+    if (!this.enabled) return;
+    this.triggerHaptic(30);
+    this._playTone(400, 'sine', 0, 0.08, 0.2, 0.01);
+    this._playTone(600, 'sine', 0.04, 0.1, 0.25, 0.001);
   }
 }
 
