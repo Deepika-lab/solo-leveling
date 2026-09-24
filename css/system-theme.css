@@ -256,6 +256,12 @@ body::after {
   color: var(--gold);
 }
 
+.currency-pill.gold span:first-child,
+.gold-icon {
+  filter: drop-shadow(0 0 4px #f59e0b) sepia(1) saturate(5) hue-rotate(15deg);
+  display: inline-block;
+}
+
 .currency-pill.crystals {
   border-color: rgba(168, 85, 247, 0.4);
   color: #d8b4fe;

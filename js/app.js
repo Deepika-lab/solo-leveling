@@ -89,14 +89,18 @@ class SoloLevelingApp {
       const cards = document.querySelectorAll('.card-3d-tilt');
       cards.forEach(card => {
         const rect = card.getBoundingClientRect();
+        if (rect.width > 420 || rect.height > 400) {
+          card.style.transform = '';
+          return;
+        }
         const dx = e.clientX - (rect.left + rect.width / 2);
         const dy = e.clientY - (rect.top + rect.height / 2);
         const dist = Math.hypot(dx, dy);
 
-        if (dist < 320) {
-          const rotX = -(dy / (rect.height / 2)) * 6;
-          const rotY = (dx / (rect.width / 2)) * 6;
-          card.style.transform = `perspective(900px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+        if (dist < 260) {
+          const rotX = -(dy / (rect.height / 2)) * 2.5;
+          const rotY = (dx / (rect.width / 2)) * 2.5;
+          card.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
         } else {
           card.style.transform = '';
         }
